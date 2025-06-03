@@ -1,10 +1,11 @@
 """Implement Bayesian optimization using bayes_opt."""
 
 from dataclasses import dataclass
-from typing import Any, Dict, Optional
+from typing import Any, Optional, Union
 
 import numpy as np
 from bayes_opt import BayesianOptimization, acquisition
+from bayes_opt.acquisition import AcquisitionFunction
 from numpy.typing import NDArray
 from scipy.optimize import NonlinearConstraint
 
@@ -31,7 +32,7 @@ from optimagic.typing import (
     supports_parallelism=False,
     supports_bounds=True,
     supports_linear_constraints=False,
-    supports_nonlinear_constraints=True,
+    supports_nonlinear_constraints=False,
     disable_history=False,
 )
 @dataclass(frozen=True)
@@ -46,9 +47,17 @@ class BayesOpt(Algorithm):
         xi: Exploration-exploitation trade-off parameter for EI and PI acquisitions
         exploration_decay: Rate at which exploration decays over time
             (None for no decay)
-        exploration_decay_delay: Number of iterations before starting exploration decay
+        exploration_decay_delay: Delay for decay.
         random_state: Random seed for reproducibility
-        acquisition_function: Type of acquisition function ("ucb", "ei", or "poi")
+        acquisition_function: Acquisition function used to guide the Bayesian
+            optimization process. Can be one of the following strings:
+                - "ucb" or "upper_confidence_bound" for Upper Confidence Bound
+                - "ei" or "expected_improvement" for Expected Improvement
+                - "poi" or "probability_of_improvement" for Probability of Improvement
+            Alternatively, a custom instance of
+            `bayes_opt.acquisition.AcquisitionFunction` can be passed.
+            If set to None, the default acquisition function defined by the
+            `bayes_opt` package is used.
         allow_duplicate_points: Whether to allow duplicate evaluation points
         enable_sdr: Enable Sequential Domain Reduction
         sdr_gamma_osc: Oscillation parameter for SDR
@@ -68,7 +77,7 @@ class BayesOpt(Algorithm):
     exploration_decay: float | None = None
     exploration_decay_delay: int | None = None
     random_state: int | None = None
-    acquisition_function: str | None = None
+    acquisition_function: Union[str, AcquisitionFunction, None] = None
     allow_duplicate_points: bool = False
     enable_sdr: bool = False
     sdr_gamma_osc: float = 0.7
@@ -107,24 +116,7 @@ class BayesOpt(Algorithm):
             )
         }
 
-        common_kwargs = {
-            "exploration_decay": self.exploration_decay,
-            "exploration_decay_delay": self.exploration_decay_delay,
-            "random_state": self.random_state,
-        }
-
-        acq = None
-        if self.acquisition_function == "ucb":
-            acq = acquisition.UpperConfidenceBound(kappa=self.kappa, **common_kwargs)
-        elif self.acquisition_function == "poi":
-            acq = acquisition.ProbabilityOfImprovement(xi=self.xi, **common_kwargs)
-        elif self.acquisition_function == "ei":
-            acq = acquisition.ExpectedImprovement(xi=self.xi, **common_kwargs)
-        elif self.acquisition_function is not None:
-            raise ValueError(
-                f"Invalid acquisition_function: {self.acquisition_function}. "
-                "Must be one of: 'ucb', 'poi', 'ei'"
-            )
+        acq = self._get_acquisition_function()
 
         constraint = None
         constraint = self._process_constraints(problem.nonlinear_constraints)
@@ -182,61 +174,70 @@ class BayesOpt(Algorithm):
             fun=best_y,
             success=True,
             n_iterations=self.init_points + self.n_iter,
-            n_fun_evals=self.init_points + self.n_iter,
+            n_fun_evals=1 + self.init_points + self.n_iter,
             n_jac_evals=0,
         )
+
+    def _get_acquisition_function(self) -> AcquisitionFunction | None:
+        """Create and return the appropriate acquisition function.
+
+        Returns:
+            The configured acquisition function or None for default
+
+        Raises:
+            ValueError: If acquisition_function is invalid
+            TypeError: If acquisition_function is not a string or
+            an AcquisitionFunction instance
+
+        """
+        # Common parameters for built-in acquisition functions
+        common_kwargs = {
+            "exploration_decay": self.exploration_decay,
+            "exploration_decay_delay": self.exploration_decay_delay,
+            "random_state": self.random_state,
+        }
+
+        if self.acquisition_function is None:
+            return None
+
+        # If acquisition_function is  an instance of AcquisitionFunction class
+        elif isinstance(self.acquisition_function, AcquisitionFunction):
+            return self.acquisition_function
+
+        elif isinstance(self.acquisition_function, str):
+            acq_name = self.acquisition_function.lower()
+            if acq_name in ["ucb", "upper_confidence_bound"]:
+                return acquisition.UpperConfidenceBound(
+                    kappa=self.kappa, **common_kwargs
+                )
+            elif acq_name in ["ei", "expected_improvement"]:
+                return acquisition.ExpectedImprovement(xi=self.xi, **common_kwargs)
+            elif acq_name in ["poi", "probability_of_improvement"]:
+                return acquisition.ProbabilityOfImprovement(xi=self.xi, **common_kwargs)
+            else:
+                raise ValueError(
+                    f"Invalid acquisition_function: {self.acquisition_function}. "
+                    "Must be one of: 'ucb', 'poi', 'ei'"
+                )
+
+        else:
+            raise TypeError(
+                "acquisition_function must be a string, an AcquisitionFunction "
+                "instance, or None. "
+                f"Got {type(self.acquisition_function)}"
+            )
 
     def _process_constraints(
         self, constraints: Optional[list[dict[str, Any]]]
     ) -> Optional[NonlinearConstraint]:
-        """Process nonlinear constraints into a single NonlinearConstraint object.
+        """Temporarily skip processing of nonlinear constraints.
 
         Args:
             constraints: List of constraint dictionaries from the problem
 
         Returns:
-            A single NonlinearConstraint object combining all constraints
-            or None if no constraints
+            None. Nonlinear constraint processing is deferred.
 
         """
-        if not constraints:
-            return None
-
-        def combined_constraint_func(**kwargs: Dict[str, float]) -> NDArray[np.float64]:
-            x = np.array([kwargs[f"param{i}"] for i in range(len(kwargs))])
-            results = []
-            for constr in constraints:
-                # Evaluate constraint function
-                constr_val = np.atleast_1d(constr["fun"](x))
-                results.append(constr_val)
-
-            # Concatenate all constraint values
-            combined = np.concatenate(results)
-
-            # Replace infinities with large finite values to avoid GP fitting issues
-            combined = np.nan_to_num(combined, nan=1e10, posinf=1e10, neginf=-1e10)
-            return combined
-
-        # Determine bounds for all constraints
-        lbs = []
-        ubs = []
-
-        for c in constraints:
-            if c["type"] == "eq":
-                tol = c.get("tol", 1e-6)
-                n_constr = c.get("n_constr", 1)
-                lbs.extend([-tol] * n_constr)
-                ubs.extend([tol] * n_constr)
-            elif c["type"] == "ineq":
-                n_constr = c.get("n_constr", 1)
-                lbs.extend([0.0] * n_constr)
-                ubs.extend([np.inf] * n_constr)
-            else:
-                raise ValueError(f"Unknown constraint type: {c['type']}")
-
-        # Combine all constraints into a single vectorized constraint
-        return NonlinearConstraint(
-            combined_constraint_func,
-            lb=np.array(lbs),
-            ub=np.array(ubs),
-        )
+        # TODO: Implement proper handling of nonlinear constraints in future.
+        return None

@@ -144,7 +144,6 @@ class BoundedGradientBasedLocalNonlinearConstrainedScalarAlgorithms(AlgoSelectio
 
 @dataclass(frozen=True)
 class BoundedGlobalGradientFreeNonlinearConstrainedScalarAlgorithms(AlgoSelection):
-    bayes_opt: Type[BayesOpt] = BayesOpt
     nlopt_isres: Type[NloptISRES] = NloptISRES
     scipy_differential_evolution: Type[ScipyDifferentialEvolution] = (
         ScipyDifferentialEvolution
@@ -346,7 +345,6 @@ class BoundedGradientBasedNonlinearConstrainedScalarAlgorithms(AlgoSelection):
 
 @dataclass(frozen=True)
 class BoundedGlobalGradientFreeNonlinearConstrainedAlgorithms(AlgoSelection):
-    bayes_opt: Type[BayesOpt] = BayesOpt
     nlopt_isres: Type[NloptISRES] = NloptISRES
     scipy_differential_evolution: Type[ScipyDifferentialEvolution] = (
         ScipyDifferentialEvolution
@@ -425,7 +423,6 @@ class BoundedGlobalGradientFreeParallelAlgorithms(AlgoSelection):
 
 @dataclass(frozen=True)
 class GlobalGradientFreeNonlinearConstrainedScalarAlgorithms(AlgoSelection):
-    bayes_opt: Type[BayesOpt] = BayesOpt
     nlopt_isres: Type[NloptISRES] = NloptISRES
     scipy_differential_evolution: Type[ScipyDifferentialEvolution] = (
         ScipyDifferentialEvolution
@@ -570,7 +567,6 @@ class GradientFreeLeastSquaresLocalParallelAlgorithms(AlgoSelection):
 
 @dataclass(frozen=True)
 class BoundedGradientFreeNonlinearConstrainedScalarAlgorithms(AlgoSelection):
-    bayes_opt: Type[BayesOpt] = BayesOpt
     nlopt_cobyla: Type[NloptCOBYLA] = NloptCOBYLA
     nlopt_isres: Type[NloptISRES] = NloptISRES
     scipy_differential_evolution: Type[ScipyDifferentialEvolution] = (
@@ -661,7 +657,6 @@ class GradientFreeNonlinearConstrainedParallelScalarAlgorithms(AlgoSelection):
 
 @dataclass(frozen=True)
 class BoundedGlobalNonlinearConstrainedScalarAlgorithms(AlgoSelection):
-    bayes_opt: Type[BayesOpt] = BayesOpt
     nlopt_isres: Type[NloptISRES] = NloptISRES
     scipy_differential_evolution: Type[ScipyDifferentialEvolution] = (
         ScipyDifferentialEvolution
@@ -1071,7 +1066,6 @@ class BoundedGlobalGradientFreeAlgorithms(AlgoSelection):
 
 @dataclass(frozen=True)
 class GlobalGradientFreeNonlinearConstrainedAlgorithms(AlgoSelection):
-    bayes_opt: Type[BayesOpt] = BayesOpt
     nlopt_isres: Type[NloptISRES] = NloptISRES
     scipy_differential_evolution: Type[ScipyDifferentialEvolution] = (
         ScipyDifferentialEvolution
@@ -1275,7 +1269,6 @@ class GradientFreeLocalParallelAlgorithms(AlgoSelection):
 
 @dataclass(frozen=True)
 class BoundedGradientFreeNonlinearConstrainedAlgorithms(AlgoSelection):
-    bayes_opt: Type[BayesOpt] = BayesOpt
     nlopt_cobyla: Type[NloptCOBYLA] = NloptCOBYLA
     nlopt_isres: Type[NloptISRES] = NloptISRES
     scipy_differential_evolution: Type[ScipyDifferentialEvolution] = (
@@ -1409,7 +1402,6 @@ class BoundedGradientFreeParallelAlgorithms(AlgoSelection):
 
 @dataclass(frozen=True)
 class GradientFreeNonlinearConstrainedScalarAlgorithms(AlgoSelection):
-    bayes_opt: Type[BayesOpt] = BayesOpt
     nlopt_cobyla: Type[NloptCOBYLA] = NloptCOBYLA
     nlopt_isres: Type[NloptISRES] = NloptISRES
     scipy_cobyla: Type[ScipyCOBYLA] = ScipyCOBYLA
@@ -1499,7 +1491,6 @@ class GradientFreeLeastSquaresParallelAlgorithms(AlgoSelection):
 
 @dataclass(frozen=True)
 class BoundedGlobalNonlinearConstrainedAlgorithms(AlgoSelection):
-    bayes_opt: Type[BayesOpt] = BayesOpt
     nlopt_isres: Type[NloptISRES] = NloptISRES
     scipy_differential_evolution: Type[ScipyDifferentialEvolution] = (
         ScipyDifferentialEvolution
@@ -1598,7 +1589,6 @@ class BoundedGlobalParallelAlgorithms(AlgoSelection):
 
 @dataclass(frozen=True)
 class GlobalNonlinearConstrainedScalarAlgorithms(AlgoSelection):
-    bayes_opt: Type[BayesOpt] = BayesOpt
     nlopt_isres: Type[NloptISRES] = NloptISRES
     scipy_differential_evolution: Type[ScipyDifferentialEvolution] = (
         ScipyDifferentialEvolution
@@ -1822,7 +1812,6 @@ class LeastSquaresLocalParallelAlgorithms(AlgoSelection):
 
 @dataclass(frozen=True)
 class BoundedNonlinearConstrainedScalarAlgorithms(AlgoSelection):
-    bayes_opt: Type[BayesOpt] = BayesOpt
     ipopt: Type[Ipopt] = Ipopt
     nlopt_cobyla: Type[NloptCOBYLA] = NloptCOBYLA
     nlopt_isres: Type[NloptISRES] = NloptISRES
@@ -2285,7 +2274,6 @@ class BoundedGradientFreeAlgorithms(AlgoSelection):
 
 @dataclass(frozen=True)
 class GradientFreeNonlinearConstrainedAlgorithms(AlgoSelection):
-    bayes_opt: Type[BayesOpt] = BayesOpt
     nlopt_cobyla: Type[NloptCOBYLA] = NloptCOBYLA
     nlopt_isres: Type[NloptISRES] = NloptISRES
     scipy_cobyla: Type[ScipyCOBYLA] = ScipyCOBYLA
@@ -2491,7 +2479,6 @@ class BoundedGlobalAlgorithms(AlgoSelection):
 
 @dataclass(frozen=True)
 class GlobalNonlinearConstrainedAlgorithms(AlgoSelection):
-    bayes_opt: Type[BayesOpt] = BayesOpt
     nlopt_isres: Type[NloptISRES] = NloptISRES
     scipy_differential_evolution: Type[ScipyDifferentialEvolution] = (
         ScipyDifferentialEvolution
@@ -2793,7 +2780,6 @@ class LocalParallelAlgorithms(AlgoSelection):
 
 @dataclass(frozen=True)
 class BoundedNonlinearConstrainedAlgorithms(AlgoSelection):
-    bayes_opt: Type[BayesOpt] = BayesOpt
     ipopt: Type[Ipopt] = Ipopt
     nlopt_cobyla: Type[NloptCOBYLA] = NloptCOBYLA
     nlopt_isres: Type[NloptISRES] = NloptISRES
@@ -2974,7 +2960,6 @@ class BoundedParallelAlgorithms(AlgoSelection):
 
 @dataclass(frozen=True)
 class NonlinearConstrainedScalarAlgorithms(AlgoSelection):
-    bayes_opt: Type[BayesOpt] = BayesOpt
     ipopt: Type[Ipopt] = Ipopt
     nlopt_cobyla: Type[NloptCOBYLA] = NloptCOBYLA
     nlopt_isres: Type[NloptISRES] = NloptISRES
@@ -3436,7 +3421,6 @@ class BoundedAlgorithms(AlgoSelection):
 
 @dataclass(frozen=True)
 class NonlinearConstrainedAlgorithms(AlgoSelection):
-    bayes_opt: Type[BayesOpt] = BayesOpt
     ipopt: Type[Ipopt] = Ipopt
     nlopt_cobyla: Type[NloptCOBYLA] = NloptCOBYLA
     nlopt_isres: Type[NloptISRES] = NloptISRES

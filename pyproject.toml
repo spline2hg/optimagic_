@@ -380,5 +380,6 @@ module = [
     "pdbp",
     "bayesian-optimization",
     "bayes_opt",
+    "bayes_opt.acquisition",
   ]
 ignore_missing_imports = true
